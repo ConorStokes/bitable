@@ -38,14 +38,14 @@ typedef struct BitableMemoryMappedFile
  * @param openFlags This is the options for opening the memory mapped file.
  * @return A return code indicating the success of the operation, or a value indicating the kind of error that occured otherwise.
  */
-BitableResult bitable_mmf_open( BitableMemoryMappedFile* memoryMappedFile, const char* path, BitableReadOpenFlags openFlags );
+BITABLE_API BitableResult bitable_mmf_open( BitableMemoryMappedFile* memoryMappedFile, const char* path, BitableReadOpenFlags openFlags );
 
 /** Closes a read-only memory mapped file that has been opened by bitable_mmf_open 
 *
 * @param memoryMappedFile This will be populated with the memory mapped file details and should be passed to close when done. Does not null check.
 * @return A return code indicating the success of the operation, or a value indicating the kind of error that occured otherwise.
 */
-BitableResult bitable_mmf_close( BitableMemoryMappedFile* memoryMappedFile );
+BITABLE_API BitableResult bitable_mmf_close( BitableMemoryMappedFile* memoryMappedFile );
 
 #ifdef __cplusplus
 }

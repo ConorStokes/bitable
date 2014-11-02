@@ -17,14 +17,14 @@ typedef struct BitableWritableFile BitableWritableFile;
   * @param path The file path to open, should be in UTF8 encoding. Does not null check.
   * @return A return code indicating either success, or the reason for failure.
   */
-BitableResult bitable_wf_create( BitableWritableFile** file, const char* path );
+BITABLE_API BitableResult bitable_wf_create( BitableWritableFile** file, const char* path );
 
 /** Seek to a position in a previously opened file relative the beginning.
   * @param file The file to seek in. Does not null check.
   * @param position The position to seek to.
   * @return A return code indicating either success, or the reason for failure.
   */
-BitableResult bitable_wf_seek( BitableWritableFile* file, int64_t position );
+BITABLE_API BitableResult bitable_wf_seek( BitableWritableFile* file, int64_t position );
 
 /** Write data to the current file point for a file.
   * @param file The file to write to. Does not null check.
@@ -32,19 +32,19 @@ BitableResult bitable_wf_seek( BitableWritableFile* file, int64_t position );
   * @param size The amount of data to write in bytes.
   * @return A return code indicating either success, or the reason for failure.
   */
-BitableResult bitable_wf_write( BitableWritableFile* file, const void* data, uint32_t size );
+BITABLE_API BitableResult bitable_wf_write( BitableWritableFile* file, const void* data, uint32_t size );
 
 /** Sync a file to disk, including its metadata.
   * @param file The file to sync. Does not null check.
   * @return A return code indicating either success, or the reason for failure.
   */
-BitableResult bitable_wf_sync( BitableWritableFile* file );
+BITABLE_API BitableResult bitable_wf_sync( BitableWritableFile* file );
 
 /** Close a previously opened file.
 * @param file The file to close. Does not null check.
 * @return A return code indicating either success, or the reason for failure.
 */
-BitableResult bitable_wf_close( BitableWritableFile* memoryMappedFile );
+BITABLE_API BitableResult bitable_wf_close( BitableWritableFile* memoryMappedFile );
 
 #ifdef __cplusplus
 }
