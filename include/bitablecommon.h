@@ -27,14 +27,31 @@ extern "C" {
 #endif
 #endif
 #else 
+
+/** The API prefix macro for the bitable exported functions
+  */
 #define BITABLE_API
 #endif
 
+/** The maximum allowed keysize in bytes. You may not have keys larger than this.
+  */
 #define BITABLE_MAX_KEY_SIZE 768
+
+/** The minimum allowed page size in bytes. You may not specify pages smaller than this.
+  */
 #define BITABLE_MIN_PAGE_SIZE 2048
+
+/** The maximum page size allowed in bytes. Note, the limit is 64k because internal offsets are 16bit unsigned.
+  */
 #define BITABLE_MAX_PAGE_SIZE 65536
+
+/** The maximum alignment that can be used for keys and values.
+  */
 #define BITABLE_MAX_ALIGNMENT 512
-#define BITABLE_MAX_BRANCH_LEVELS 64
+
+/** The maximum number of branch levels used before indexing the bitable.
+  */
+#define BITABLE_MAX_BRANCH_LEVELS 32
 
 /** Return code used by bitable functions to indicate success, error conditions etc.
  */
@@ -125,9 +142,13 @@ typedef enum BitableReadOpenFlags
   */
 typedef struct BitableValue
 {
-
+    /** A pointer to the data associated with the value.
+      */
     const void* data;
-    int32_t size; // maximum value size is 2^31
+
+    /** The size (in bytes) of the value. Maximum value is 2^31.
+      */
+    int32_t size; 
 
 } BitableValue;
 
@@ -135,12 +156,54 @@ typedef struct BitableValue
  */
 typedef struct BitablePaths
 {
-
+    /** The path of the main data file
+      */
     char* leafPath;
+
+    /** The path of the large value file
+      */
     char* largeValuePath;
+
+    /** The path of branch level files, up to the maximum branch level.
+      */
     char* branchPaths[ BITABLE_MAX_BRANCH_LEVELS ];
 
 } BitablePaths;
+
+/** Statistics and information from the readable bitable header.
+*/
+typedef struct BitableStats
+{
+
+    /** The number of items in the table.
+    */
+    uint64_t itemCount;
+
+    /** The number of leaf pages in the table.
+    */
+    uint64_t leafPages;
+
+    /** The number of bytes the large value store takes up.
+    */
+    uint64_t largeValueStoreSize;
+
+    /** The depth (number of branch levels, excluding the leaf file).
+    */
+    uint32_t depth;
+
+    /** The alignment used for keys in the file in bytes - will be a power of 2 - key addresses will be aligned with this.
+    */
+    uint32_t keyAlignment;
+
+    /** The aligment used for values in the file - will be a power of 2 - value addresses will be aligned with this.
+    */
+    uint32_t valueAlignment;
+
+    /** The number of bytes used for the pages used for this bitable. Will be a power of 2.
+    */
+    uint32_t pageSize;
+
+} BitableStats;
 
 /** Comparison function used for comparing two keys when searching a bitable.
   */
@@ -149,13 +212,13 @@ typedef int (BitableComparisonFunction)(const BitableValue* left, const BitableV
 /** Take a paths object and populate it with the potential sub-paths of a bitable. 
   * Will allocate memory to populate the paths. Does not read from the file system at all,
   * builds the maximum number of paths deterministically.
-  * @param [out] paths The paths to be populated. Does not null check.
-  * @param basePath The main path for the bitable. Does not null check.
+  * @param [out] paths The paths to be populated. Should not be null.
+  * @param basePath The main path for the bitable. Should not be null.
   */
 BITABLE_API void bitable_build_paths( BitablePaths* paths, const char* basePath );
 
 /** Free the memory for the file paths allocated by bitable_build_paths
-  * @param paths The paths to be freed. Does not null check.
+  * @param paths The paths to be freed. Should not be null.
   */
 BITABLE_API void bitable_free_paths( BitablePaths* paths );
 

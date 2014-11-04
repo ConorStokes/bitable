@@ -11,6 +11,9 @@ typedef struct BitableWritableFile
 
 } BitableWritableFile;
 
+/** Clean up a writable file, closing the handle.
+  * @param file The file to cleanup.
+  */
 static void cleanup_wf( BitableWritableFile* file )
 {
     if ( file != NULL )

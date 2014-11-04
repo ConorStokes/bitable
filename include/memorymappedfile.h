@@ -1,3 +1,6 @@
+/** @file
+  * @brief Read only memory mapped file support.
+  */
 #ifndef MEMORY_MAPPED_FILE_H__
 #define MEMORY_MAPPED_FILE_H__
 #pragma once
@@ -8,6 +11,8 @@
 extern "C" {
 #endif
 
+/** OS specific handle for a memory mapped file.
+  */
 typedef struct BitableMemoryMappedFileHandle BitableMemoryMappedFileHandle;
 
 /** Memory mapped file

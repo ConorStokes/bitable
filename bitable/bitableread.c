@@ -16,6 +16,9 @@ typedef struct BitableReadable
 
 } BitableReadable;
 
+/** Cleans up a readable bitable and closes the files associated with it.
+  * @param table The table to cleanup.
+  */
 static void cleanup_table( BitableReadable* table )
 {
     uint32_t where;
@@ -113,7 +116,7 @@ BitableResult bitable_read_close( BitableReadable* table )
     return BR_SUCCESS;
 }
 
-BitableResult bitable_stats( const BitableReadable* table, BitableReadableStats* stats )
+BitableResult bitable_readable_stats( const BitableReadable* table, BitableStats* stats )
 {
     /* TODO - error handling here */
 
@@ -410,21 +413,24 @@ BitableResult bitable_value( const BitableCursor* cursor, const BitableReadable*
 
         {
             const BitableLeafIndice* itemIndice     = leafIndex + cursor->item;
-            const int32_t            inlineDataSize = itemIndice->dataSize < BITABLE_MAX_KEY_SIZE ? itemIndice->dataSize : sizeof( uint64_t );
             const int32_t            dataFromRight  = table->header->pageSize - itemIndice->itemOffset;
-            const int32_t            paddedOffset   = table->header->pageSize - ( ( dataFromRight + inlineDataSize + ( table->header->valueAlignment - 1 ) ) & ~( table->header->valueAlignment - 1 ) );
-            const void*              dataAddress    = (const uint8_t*)page + paddedOffset;
 
             value->size = itemIndice->dataSize;
 
-            if ( value->size < BITABLE_MAX_KEY_SIZE )
+            if ( value->size <= BITABLE_MAX_KEY_SIZE )
             {
+                const uint32_t paddedOffset = table->header->pageSize - ( ( dataFromRight + itemIndice->dataSize + ( table->header->valueAlignment - 1 ) ) & ~( table->header->valueAlignment - 1 ) );
+                const void*    dataAddress  = (const uint8_t*)page + paddedOffset;
+
                 value->data = value->size > 0 ? dataAddress : NULL;
             }
             else
             {
-                size_t largeValueOffset = (size_t)*(const uint64_t*)dataAddress;
-                value->data          = (const uint8_t*)table->largeValueFile.address + largeValueOffset;
+                const uint32_t paddedOffset     = table->header->pageSize - ( ( dataFromRight + sizeof( uint64_t ) + ( sizeof( uint64_t ) - 1 ) ) & ~( sizeof( uint64_t ) - 1 ) );
+                const void*    dataAddress      = (const uint8_t*)page + paddedOffset;
+                size_t         largeValueOffset = (size_t)*(const uint64_t*)dataAddress;
+
+                value->data = (const uint8_t*)table->largeValueFile.address + largeValueOffset;
 
                 assert( table->largeValueFile.size >= largeValueOffset + value->size );
             }
@@ -453,22 +459,25 @@ BitableResult bitable_key_value_pair( const BitableCursor* cursor, const Bitable
 
         {
             const BitableLeafIndice* itemIndice     = leafIndex + cursor->item;
-            const int32_t            inlineDataSize = itemIndice->dataSize < BITABLE_MAX_KEY_SIZE ? itemIndice->dataSize : sizeof( uint64_t );
-            const int32_t            dataFromRight  = table->header->pageSize - itemIndice->itemOffset;
-            const int32_t            paddedOffset   = table->header->pageSize - ( ( dataFromRight + inlineDataSize + ( table->header->valueAlignment - 1 ) ) & ~( table->header->valueAlignment - 1 ) );
-            const void*              dataAddress    = (const uint8_t*)page + paddedOffset;
+            const uint32_t           dataFromRight  = table->header->pageSize - itemIndice->itemOffset;
 
             key->size   = itemIndice->keySize;
             key->data   = (const uint8_t*)page + itemIndice->itemOffset;
             value->size = itemIndice->dataSize;
 
-            if ( value->size < BITABLE_MAX_KEY_SIZE )
+            if ( value->size <= BITABLE_MAX_KEY_SIZE )
             {
+                const uint32_t paddedOffset = table->header->pageSize - ( ( dataFromRight + itemIndice->dataSize + ( table->header->valueAlignment - 1 ) ) & ~( table->header->valueAlignment - 1 ) );
+                const void*    dataAddress  = (const uint8_t*)page + paddedOffset;
+
                 value->data = value->size > 0 ? dataAddress : NULL;
             }
             else
             {
-                size_t largeValueOffset = (size_t)*(const uint64_t*)dataAddress;
+                const uint32_t paddedOffset     = table->header->pageSize - ( ( dataFromRight + sizeof( uint64_t ) + ( sizeof( uint64_t ) - 1 ) ) & ~( sizeof( uint64_t ) - 1 ) );
+                const void*    dataAddress      = (const uint8_t*)page + paddedOffset;
+                size_t         largeValueOffset = (size_t)*(const uint64_t*)dataAddress;
+
                 value->data = (const uint8_t*)table->largeValueFile.address + largeValueOffset;
 
                 assert( table->largeValueFile.size >= largeValueOffset + value->size );

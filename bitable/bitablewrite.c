@@ -325,7 +325,7 @@ BitableResult bitable_append( BitableWritable* table, const BitableValue* key, c
         }
         else
         {
-            newRightSize = newKeyAllocation + sizeof( uint64_t );
+            newRightSize = ( newKeyAllocation + sizeof( uint64_t ) + ( sizeof( uint64_t ) - 1 ) ) & ~( sizeof( uint64_t ) - 1 );
         }
 
         result = add_page_to_branch( table, key, 0 );
@@ -351,6 +351,8 @@ BitableResult bitable_append( BitableWritable* table, const BitableValue* key, c
     }
     else
     {
+        uint64_t paddedStoreOffset = ( table->largeValueStoreSize + ( table->valueAlignment - 1 ) ) & ~( table->valueAlignment - 1 );
+
         if ( table->largeValueFile.file == NULL )
         {
             result = create_buffered_file( &table->largeValueFile, table->paths.largeValuePath, table->pageSize );
@@ -360,10 +362,11 @@ BitableResult bitable_append( BitableWritable* table, const BitableValue* key, c
                 return result;
             }
         }
-
+        
         // If the new data won't fit in the current page in the large value store, pad out to pagesize alignment
-        if ( ( ( table->largeValueStoreSize & table->pageSize ) + data->size ) > table->pageSize )
+        if ( ( ( paddedStoreOffset & ( table->pageSize - 1 ) ) + data->size ) > table->pageSize )
         {
+            // Note, page size is guaranteed to be a larger power of 2 than table->valueAlignment, so in this case the alignment to page size is enough.
             uint64_t paddedStoreSize = ( table->largeValueStoreSize + ( table->pageSize - 1 ) ) & ~( table->pageSize - 1 );
 
             result =
@@ -377,6 +380,18 @@ BitableResult bitable_append( BitableWritable* table, const BitableValue* key, c
             }
 
             table->largeValueStoreSize = paddedStoreSize;
+        }
+        else if ( paddedStoreOffset > table->largeValueStoreSize )
+        {
+            // we have to pad at the end of the large value store before we append.
+            result = bitable_wf_write( table->largeValueFile.file, table->largeValueFile.buffer, (uint32_t)( paddedStoreOffset - table->largeValueStoreSize ) );
+
+            table->largeValueStoreSize = paddedStoreOffset;
+
+            if ( result != BR_SUCCESS )
+            {
+                return result;
+            }
         }
 
         result = bitable_wf_write( table->largeValueFile.file, data->data, data->size );
@@ -412,6 +427,19 @@ BitableResult bitable_append( BitableWritable* table, const BitableValue* key, c
 
     *leafLevel->itemCount += 1;
     ++table->itemCount;
+
+    return BR_SUCCESS;
+}
+
+BitableResult bitable_writable_stats( const BitableWritable* table, BitableStats* stats )
+{
+    stats->depth               = table->depth;
+    stats->itemCount           = table->itemCount;
+    stats->keyAlignment        = table->keyAlignment;
+    stats->largeValueStoreSize = table->largeValueStoreSize;
+    stats->leafPages           = table->leafLevel.leafPageCount;
+    stats->pageSize            = table->pageSize;
+    stats->valueAlignment      = table->valueAlignment;
 
     return BR_SUCCESS;
 }

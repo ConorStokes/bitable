@@ -44,8 +44,8 @@ typedef struct BitableWritable BitableWritable;
 BITABLE_API BitableWritable* bitable_write_allocate();
 
 /** Create an empty bitable for writing.
-  * @param [out] table A writable bitable allocated with bitable_write_allocate that will be initialised with the parameters for the table.
-  * @param path The path (UTF8 encoding) to create the bitable. This should be the main leaf/data file name.
+  * @param [out] table A writable bitable allocated with bitable_write_allocate that will be initialised with the parameters for the table. Should not be null.
+  * @param path The path (UTF8 encoding) to create the bitable. This should be the main leaf/data file name. Should not be null.
   * @param pageSize The size of the page to use. Should be greater or equal to BITABLE_MIN_PAGE_SIZE and less than or equal to BITABLE_MAX_PAGE_SIZE. Should be a power of 2. Recommended to use a memory page size on your target platform.
   * @param keyAlignment The alignment that will be used for starting address of keys stored in the table. Needs to be greater than 0, less than BITABLE_MAX_ALIGNMENT and a power of 2. 
   * @param dataAlignment The alignment that will be used for starting address of data value stored in the table. Needs to be greater than 0, less than BITABLE_MAX_ALIGNMENT and a power of 2.
@@ -57,24 +57,32 @@ BITABLE_API BitableResult bitable_write_create( BitableWritable* table, const ch
   * Keys and pairs are always appended in key sorted order. 
   * Duplicate keys are not currently supported.
   * It is the responsibility of the user to order the keys in the order matching the comparison function they will provide for reading. 
-  * @param table A writable bitable created with bitable_write_create for the key/value pair to be appended to.
-  * @param key The key of the key value pair to append. The key size needs to be less than BITABLE_MAX_KEY_SIZE
-  * @param data The value data of the key value pair to append,
+  * Only directly allocates memory when a new branch level is added. May block performing I/O.
+  * @param table A writable bitable created with bitable_write_create for the key/value pair to be appended to. Should not be null.
+  * @param key The key of the key value pair to append. The key size needs to be less than BITABLE_MAX_KEY_SIZE. Should not be null.
+  * @param data The value data of the key value pair to append. Should not be null.
   * @return BR_SUCCESS if the table is successfully created. BR_KEY_INVALID if the key is not valid. BR_MAXIMUM_TABLE_TREE_DEPTH if the tree reaches its maximum depth. BR_FILE_OPERATION_FAILED or BR_FILE_OPEN_FAILED if a file operation fails.
 */
 BITABLE_API BitableResult bitable_append( BitableWritable* table, const BitableValue* key, const BitableValue* data );
 
+/** Get the statistics associated with a particular bitable (including the number of items, depth, page size, key and value alignments etc).
+  * @param table The open readable bitable to get the stats from. Should not be null.
+  * @param [out] stats The stats from the table. Should not be null.
+  * @return BR_SUCCESS if the stats could successfully be retrieved.
+  */
+BITABLE_API BitableResult bitable_writable_stats( const BitableWritable* table, BitableStats* stats );
+
 /** Close a writable bitable created with bitable_write_create. 
   * Does not free the memory associated with the writable bitable (that allocated by bitable_write_allocate).
   * Optionally complete or discard the remaining writes required for the table.
-  * @param table The writable bitable to close.
+  * @param table The writable bitable to close. Should not be null.
   * @param options The options for completing (or discarding) the table on close.
   * @return BR_SUCCESS if the table is successfully completed/closed. BR_FILE_OPERATION_FAILED if file operations fail and prevent the completion of the bitable writes.
   */
 BITABLE_API BitableResult bitable_write_close( BitableWritable* table, BitableCompletionOptions options );
 
 /** Free the allocated bitable. If the bitable has not been closed, the bitable is closed with the BCO_DISCARD option.
-  * @param table The writable bitable to free
+  * @param table The writable bitable to free. Should be allocated by bitable_write_allocate. Should not be null.
   */
 BITABLE_API void bitable_write_free( BitableWritable* table );
 

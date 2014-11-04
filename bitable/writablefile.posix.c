@@ -38,12 +38,12 @@ BitableResult bitable_wf_create( BitableWritableFile** file, const char* path )
     if ( fileResult->fileDescriptor == -1 )
     {
         cleanup_wf( fileResult );
-        return BRC_FILE_OPEN_FAILED;
+        return BR_FILE_OPEN_FAILED;
     }
 
     *file = fileResult;
 
-    return BRC_SUCCESS;
+    return BR_SUCCESS;
 
 }
 
@@ -51,34 +51,34 @@ BitableResult bitable_wf_seek( BitableWritableFile* file, int64_t position )
 {
     if ( lseek( file->fileDescriptor, (off_t)position, SEEK_SET ) == (off_t)-1 )
     {
-        return BRC_FILE_OPERATION_FAILED;
+        return BR_FILE_OPERATION_FAILED;
     }
 
-    return BRC_SUCCESS;
+    return BR_SUCCESS;
 }
 
 BitableResult bitable_wf_write( BitableWritableFile* file, const void* data, uint32_t size )
 {
     if ( write( file->fileDescriptor, data, size ) == -1 )
     {
-        return BRC_FILE_OPERATION_FAILED;
+        return BR_FILE_OPERATION_FAILED;
     }
 
-    return BRC_SUCCESS;
+    return BR_SUCCESS;
 }
 
 BitableResult bitable_wf_sync( BitableWritableFile* file )
 {
     if ( fsync( file->fileDescriptor ) == -1 )
     {
-        return BRC_FILE_OPERATION_FAILED;
+        return BR_FILE_OPERATION_FAILED;
     }
 
-    return BRC_SUCCESS;
+    return BR_SUCCESS;
 }
 
 BitableResult bitable_wf_close( BitableWritableFile* file )
 {
     cleanup_wf( file );
-    return BRC_SUCCESS;
+    return BR_SUCCESS;
 }

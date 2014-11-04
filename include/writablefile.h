@@ -1,3 +1,6 @@
+/** @file
+  * @brief Writable file IO support.
+  */
 #ifndef WRITABLE_FILE_H__
 #define WRITABLE_FILE_H__
 #pragma once
@@ -6,11 +9,11 @@
 extern "C" {
 #endif
 
+#include "bitablecommon.h"
+
 /** OS specific structure for the handle information for a writable file.
   */
 typedef struct BitableWritableFile BitableWritableFile;
-
-#include "bitablecommon.h"
 
 /** Create a file for writing, allocating the handle information
   * @param [out] file Allocated open file handling for writing - should be closed with bitable_wf_close if this open function is successful. No null check performed.
@@ -41,10 +44,10 @@ BITABLE_API BitableResult bitable_wf_write( BitableWritableFile* file, const voi
 BITABLE_API BitableResult bitable_wf_sync( BitableWritableFile* file );
 
 /** Close a previously opened file.
-* @param file The file to close. Does not null check.
-* @return A return code indicating either success, or the reason for failure.
-*/
-BITABLE_API BitableResult bitable_wf_close( BitableWritableFile* memoryMappedFile );
+  * @param file The file to close. Does not null check.
+  * @return A return code indicating either success, or the reason for failure.
+  */
+BITABLE_API BitableResult bitable_wf_close( BitableWritableFile* file );
 
 #ifdef __cplusplus
 }

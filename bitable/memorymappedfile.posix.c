@@ -39,7 +39,7 @@ static void cleanup_mmf( BitableMemoryMappedFile* memoryMappedFile )
     }
 }
 
-BitableResult bitable_open( BitableMemoryMappedFile* memoryMappedFile, const char* path, BitableReadOpenFlags openFlags )
+BitableResult bitable_mmf_open( BitableMemoryMappedFile* memoryMappedFile, const char* path, BitableReadOpenFlags openFlags )
 {
     memset( memoryMappedFile, 0, sizeof( BitableMemoryMappedFile ) );
 
@@ -54,7 +54,7 @@ BitableResult bitable_open( BitableMemoryMappedFile* memoryMappedFile, const cha
         if ( memoryMappedFile->handle->fileDescriptor == -1 )
         {
             cleanup_mmf( memoryMappedFile );
-            return BRC_FILE_OPEN_FAILED;
+            return BR_FILE_OPEN_FAILED;
         }
         
         switch ( openFlags )
@@ -76,22 +76,22 @@ BitableResult bitable_open( BitableMemoryMappedFile* memoryMappedFile, const cha
 
         }
 
-        if ( posix_fadvise( memorMappedFile->handle->fileDescriptor, 0, 0, advice ) != 0 )
+        if ( posix_fadvise( memoryMappedFile->handle->fileDescriptor, 0, 0, advice ) != 0 )
         {
             cleanup_mmf( memoryMappedFile );
-            return BRC_FILE_OPERATION_FAILED;
+            return BR_FILE_OPERATION_FAILED;
         }
         
         if ( fstat( memoryMappedFile->handle->fileDescriptor, &fileStats ) == -1 )
         {
             cleanup_mmf( memoryMappedFile );
-            return BRC_FILE_OPERATION_FAILED;
+            return BR_FILE_OPERATION_FAILED;
         }
 
         if ( fileStats.st_size > ((size_t)-1) )
         {
             cleanup_mmf( memoryMappedFile );
-            return BRC_FILE_TOO_LARGE;
+            return BR_FILE_TOO_LARGE;
         }
 
         memoryMappedFile->size    = (size_t)fileStats.st_size;
@@ -100,16 +100,16 @@ BitableResult bitable_open( BitableMemoryMappedFile* memoryMappedFile, const cha
         if ( memoryMappedFile->address == MAP_FAILED )
         {
             cleanup_mmf( memoryMappedFile );
-            return BRC_FILE_OPERATION_FAILED;
+            return BR_FILE_OPERATION_FAILED;
         }
     }
 
-    return BRC_SUCCESS;
+    return BR_SUCCESS;
 }
 
 
-BitableResult bitable_close( BitableMemoryMappedFile* memoryMappedFile )
+BitableResult bitable_mmf_close( BitableMemoryMappedFile* memoryMappedFile )
 {
     cleanup_mmf( memoryMappedFile );
-    return BRC_SUCCESS;
+    return BR_SUCCESS;
 }
