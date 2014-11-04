@@ -1,6 +1,6 @@
 solution "Bitable"
 	configurations { "DebugLib", "ReleaseLib", "DebugDLL", "ReleaseDLL" }
-	platforms      { "x32", "x64", "universal" }
+	platforms      { "x32", "x64" }
 	includedirs    { "include" }
 	flags          { "NoPCH" }
 	location       ( _ACTION )
@@ -29,10 +29,8 @@ solution "Bitable"
 
 		configuration "linux"
 			excludes { "bitable/*.win32.c"}
-
-		configuration "macosx"
-			excludes { "bitable/*.win32.c"}
-
+			buildoptions { "-fvisibility=hidden" }
+			
 		configuration { "x64", "DebugLib" }
 			targetdir "bin/64/debug_lib"
 
@@ -56,18 +54,6 @@ solution "Bitable"
 
 		configuration { "x32", "ReleaseDLL" }
 			targetdir "bin/32/release_dll"
-						
-		configuration { "universal", "DebugLib" }
-			targetdir "bin/universal/debug_lib"
-
-		configuration { "universal", "ReleaseLib" }
-			targetdir "bin/universal/release_lib"
-
-		configuration { "universal", "DebugDLL" }
-			targetdir "bin/universal/debug_dll"
-
-		configuration { "universal", "ReleaseDLL" }
-			targetdir "bin/universal/release_dll"
 
 	project "example"
 		language "C++"
@@ -83,6 +69,14 @@ solution "Bitable"
 
 		configuration "*DLL"
 			defines { "BITABLE_DLL" }
+			if os.is( "linux" ) then
+				if _ACTION == "gmake" then
+					linkoptions { "-Wl,-rpath,'$$ORIGIN'" } 
+				elseif _ACTION == "codeblocks" then
+					linkoptions { "-Wl,-R\\\\$$$ORIGIN" }
+				end
+			end
+	
 
 		configuration { "x64", "DebugLib" }
 			targetdir "bin/64/debug_lib"
@@ -107,15 +101,4 @@ solution "Bitable"
 
 		configuration { "x32", "ReleaseDLL" }
 			targetdir "bin/32/release_dll"
-						
-		configuration { "universal", "DebugLib" }
-			targetdir "bin/universal/debug_lib"
-
-		configuration { "universal", "ReleaseLib" }
-			targetdir "bin/universal/release_lib"
-
-		configuration { "universal", "DebugDLL" }
-			targetdir "bin/universal/debug_dll"
-
-		configuration { "universal", "ReleaseDLL" }
-			targetdir "bin/universal/release_dll"
+		
