@@ -216,7 +216,7 @@ BitableResult bitable_find( BitableCursor* cursor, const BitableReadable* table,
 
     cursor->page = childPage;
 
-    // as opposed to the exact or lower search above, we do a lower bound search below
+    // as opposed to the exact or upper bound search above, we do a lower bound search below
     {
         const void*              node           = (const uint8_t*)table->leafFile.address + ( table->header->pageSize * ( childPage + 1 ) );
         int                      itemCount      = *(const int32_t*)((const uint8_t*)node + sizeof( uint64_t ) );
