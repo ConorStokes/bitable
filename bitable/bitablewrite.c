@@ -265,7 +265,6 @@ BitableResult bitable_write_create( BitableWritable* table, const char* path, ui
         leafLevel->rightSize = 0;
     }
 
-
     if ( result != BR_SUCCESS )
     {
         cleanup_writable( table );
