@@ -1,5 +1,6 @@
 /** @file
   * @brief Interface for reading from a bitable.
+  * Note that readable bitables are immutable and that apart from allocating/opening and closing the table, no resource allocation is directly performed.
   */
 #ifndef BITABLE_READ_H__
 #define BITABLE_READ_H__
@@ -11,11 +12,13 @@
 extern "C" {
 #endif
 
-/** A bitable that can be read from.
+/** A bitable that can be read from. 
+  * Allocate on the heap using bitable_read_allocate. Open an allocated one from the file system using bitable_read_open.
   */
 typedef struct BitableReadable BitableReadable;
 
 /** A cursor - represents a position in the bitable that contains a key value pair. 
+  * Cursors index into the leaf level directly (page and item within the leaf page).
   */
 typedef struct BitableCursor
 {
@@ -60,8 +63,9 @@ BITABLE_API BitableReadable* bitable_read_allocate();
   * It is safe to open the same path multiple times with different BitableReadable instances, even in different processes. 
   * You should not try and re-use the same BitableReadable instance without closing it. 
   * Closing/opening with regards to the BitableReadable instance are not thread safe operations so they should only be done exclusively.
+  * Memory mapped within bitable_read_open should be protected to be read only.
   * @param [out] table The previously allocated readable bitable to open into. Should not be null.
-  * @param path The path to the bitable to open, in UTF8 encoding. Should not be null.
+  * @param path The path to the bitable to open, in UTF8 encoding (even on Windows extended charactesr are supported). Should not be null.
   * @param openFlags The flags to use for opening the bitable - note reading hints will be applied to leaf and large value files only, 
   * @param comparison A comparison function that will be used to compare keys for searching. This should match the sort order when the keys were appended. Should not be null.
   * @return BR_SUCCESS if the table could be successfully opened for reading, an error code otherwise (BR_ALREADY_OPEN, BR_FILE_OPERATION_FAILED, BR_FILE_TOO_SMALL, BR_HEADER_CORRUPT, BR_FILE_OPEN_FAILED, BR_FILE_TOO_LARGE).
@@ -69,7 +73,7 @@ BITABLE_API BitableReadable* bitable_read_allocate();
 BITABLE_API BitableResult bitable_read_open( BitableReadable* table, const char* path, BitableReadOpenFlags openFlags, BitableComparisonFunction* comparison );
 
 /** Close the file handles (etc) associated with a previously opened readable bitable. 
-  * Note, this operation can be called on an already closed table. 
+  * Note, this operation can be called on an already closed table (idempotence). 
   * This does not free the memory associated with the BitableReadable, so it can be re-used.
   * Closing/opening with regards to the BitableReadable instance are not thread safe operations so they should only be done exclusively.
   * @param table The readable bitable to close. Should not be null.
@@ -93,7 +97,9 @@ BITABLE_API void bitable_read_free( BitableReadable* table );
 BITABLE_API BitableResult bitable_readable_stats( const BitableReadable* table, BitableStats* stats );
 
 /** Given a key and find operation, find a matching position in the bitable and populate the cursor with it.  
-  * This method is thread-safe on an open table (but the table must be open for the duration of the call).
+  * This method is thread-safe on an open table (but the table must be open for the duration of the call), as it does not modify the bitable.
+  * BFO_EXACT searches will only find exact key matches, BFO_LOWER will find the lower inclusive bound of a range. BFO_UPPER will find the upper inclusive bound of a range search.
+  * Note that this function does not allocate memory from the heap, but it may cause memory to be demand paged (memory mapped file).
   * @param [out] cursor The cursor that will be populated with the find position. Should not be null.
   * @param table The open readable bitable to find the key in. Should not be null.
   * @param searchKey The key to search for. Should not be null.

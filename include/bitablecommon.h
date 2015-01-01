@@ -176,44 +176,45 @@ typedef struct BitableStats
 {
 
     /** The number of items in the table.
-    */
+     */
     uint64_t itemCount;
 
     /** The number of leaf pages in the table.
-    */
+     */
     uint64_t leafPages;
 
     /** The number of bytes the large value store takes up.
-    */
+     */
     uint64_t largeValueStoreSize;
 
     /** The depth (number of branch levels, excluding the leaf file).
-    */
+     */
     uint32_t depth;
 
     /** The alignment used for keys in the file in bytes - will be a power of 2 - key addresses will be aligned with this.
-    */
+     */
     uint32_t keyAlignment;
 
     /** The aligment used for values in the file - will be a power of 2 - value addresses will be aligned with this.
-    */
+     */
     uint32_t valueAlignment;
 
     /** The number of bytes used for the pages used for this bitable. Will be a power of 2.
-    */
+     */
     uint32_t pageSize;
 
 } BitableStats;
 
-/** Comparison function used for comparing two keys when searching a bitable.
+/** The type for a comparison function used for comparing two keys when searching a bitable.
   */
 typedef int (BitableComparisonFunction)(const BitableValue* left, const BitableValue* right);
 
 /** Take a paths object and populate it with the potential sub-paths of a bitable. 
   * Will allocate memory to populate the paths. Does not read from the file system at all,
   * builds the maximum number of paths deterministically.
+  * Note, uses malloc to allocate paths.
   * @param [out] paths The paths to be populated. Should not be null.
-  * @param basePath The main path for the bitable. Should not be null.
+  * @param basePath The main path for the bitable. Should not be null. Null terminated UTF8 is expected.
   */
 BITABLE_API void bitable_build_paths( BitablePaths* paths, const char* basePath );
 

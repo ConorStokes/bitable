@@ -8,6 +8,7 @@ static const int SIMPLE_TABLE_UPPER = 1024 * 1024;
 // All keys in the large value table will be less than this.
 static const int LARGE_VALUE_UPPER  = 4096;
 
+// Example key comparison function. 
 static int key_compare( const BitableValue* left, const BitableValue* right ) 
 { 
     return *(int32_t*)left->data - *(int32_t*)right->data; 
@@ -49,6 +50,7 @@ private:
     ReadableOwner& operator=( const ReadableOwner& );
 };
 
+// Example of writing out a simple example bitable with small keys and values
 static bool write_simple_table( BitableWritable* writable )
 {
     // create the table file
@@ -93,6 +95,8 @@ static bool write_simple_table( BitableWritable* writable )
     return true;
 }
 
+// Example of reading through the simple bitable sequentially.
+// Note that you could use a bitable_find query first and then read sequentially from that point on.
 static void read_simple_sequential( BitableReadable* readable )
 {
     printf( "Doing sequential scan...\n" );
@@ -130,6 +134,7 @@ static void read_simple_sequential( BitableReadable* readable )
     return;
 }
 
+// Example of reading value from the simple bitable using exact point queries
 static void read_simple_exact( BitableReadable* readable )
 {
     printf( "Doing exact key searches...\n" );
@@ -174,6 +179,7 @@ static void read_simple_exact( BitableReadable* readable )
     }    
 }
 
+// Example of reading values from the simple bitable using upper bound queries
 static void read_simple_upper( BitableReadable* readable )
 {
     printf( "Doing upper bound key searches...\n" );
@@ -212,6 +218,7 @@ static void read_simple_upper( BitableReadable* readable )
     }
 }
 
+// Example of reading values from the simple bitable using lower bound queries
 static void read_simple_lower( BitableReadable* readable )
 {
     printf( "Doing lower bound key searches...\n" );
@@ -250,6 +257,7 @@ static void read_simple_lower( BitableReadable* readable )
     }
 }
 
+// Performs the reading examples for the simple example table
 static void read_simple_table( BitableReadable* readable )
 {
     printf( "Opening simple table for reading\n" );
@@ -299,6 +307,7 @@ static void read_simple_table( BitableReadable* readable )
     bitable_free_paths( &paths );
 }
 
+// Writes an example bitable with larger values (some of them too large to fit in the leaf pages, going to the large value store instead)
 bool write_large_value_table( BitableWritable* writable )
 {
     printf( "Writing large value table\n" );
@@ -350,6 +359,7 @@ bool write_large_value_table( BitableWritable* writable )
     return true;
 }
 
+// Reads through the example bitable with large values sequentially
 static void read_large_sequential( BitableReadable* readable )
 {
     printf( "Doing sequential scan...\n" );
@@ -400,6 +410,7 @@ static void read_large_sequential( BitableReadable* readable )
     return;
 }
 
+// Example of exact key find operations
 static void read_large_exact( BitableReadable* readable )
 {
     printf( "Doing exact key searches...\n" );
@@ -457,6 +468,7 @@ static void read_large_exact( BitableReadable* readable )
     }
 }
 
+// Example of reading the large values table.
 static void read_large_value_table( BitableReadable* readable )
 {
     printf( "Opening large table for reading\n" );
@@ -504,6 +516,7 @@ static void read_large_value_table( BitableReadable* readable )
     bitable_free_paths( &paths );
 }
 
+// Entry point, runs through the examples in order.
 int main( int argc, char* argv[] )
 {
     printf( "Creating table to append...\n" );
