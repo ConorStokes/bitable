@@ -12,13 +12,13 @@ There are 4 build configurations (combinations of debug/release and static libra
 
 To build the static lib release x64 version with make on Linux (from the repository directory):
 
-> premake4 gmake
-> cd gmake
-> make config=releaselib64
+	premake4 gmake
+	cd gmake
+	make config=releaselib64
 
 On Windows, you can produce a Visual Studio 2013 file (in the vs2013 subdirectory) using the below:
 
-> premake4 vs2013
+	premake4 vs2013
 
 ## Example ##
 
