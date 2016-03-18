@@ -1,6 +1,6 @@
 ## Bitables ##
 
-Bitables are a data structure that is a hybrid of an SSTable and a b+ tree. They are an immutable, ordered, indexed data structure designed for fast range and point queries, being merged etc. They are described [here](http://conorstokes.github.io/data%20structures/2015/01/01/introducing-bitables/).
+Bitables are a data structure that is a hybrid of an SSTable and a b+ tree. They are an immutable, ordered, indexed data structure designed for fast range and point queries, being merged etc. They are described [here](http://conorstokes.github.io/data%20structures/2015/01/01/introducing-bitables).
 
 This library is the reference implementation, written in C and using memory mapped I/O. 
 
